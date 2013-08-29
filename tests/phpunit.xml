@@ -1,0 +1,15 @@
+<phpunit bootstrap="bootstrap.php"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         verbose="true"
+         stopOnFailure="false"
+         processIsolation="false"
+         backupGlobals="false"
+         syntaxCheck="true"
+>
+    <testsuite name="Mvlabs Lumber Test Suite">
+        <directory>./MvlabsLumberTest</directory>
+    </testsuite>
+</phpunit>
