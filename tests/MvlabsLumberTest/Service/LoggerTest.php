@@ -52,6 +52,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * Tests channel addition
+     *
      * @covers MvlabsLumber\Service\Logger::addChannel
      */
     public function testAddChannel() {
@@ -66,6 +67,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * Get a list of logger channels
+     *
      * @covers MvlabsLumber\Service\Logger::getChannels
      * @covers MvlabsLumber\Service\Logger::getChannel
      */
@@ -135,6 +137,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
     /**
      * Tests channel removal with not existing channel
      *
+     * @covers MvlabsLumber\Service\Logger::removeChannel
      * @expectedException \UnexpectedValueException
      * @expectedExceptionMessage Channel default does not exist. Cannot remove it
      *
@@ -151,6 +154,8 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * Returns a specific logging channel
+     *
+     * @covers MvlabsLumber\Service\Logger::getChannel
      * @expectedException \UnexpectedValueException
      * @expectedExceptionMessage Channel default does not exist
      */
@@ -166,9 +171,6 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * Tests logging with different severity levels
-     *
-     * This is the only place where I accept violating DRY
-     * for the sake of clarity
      *
      * @covers MvlabsLumber\Service\Logger::log
      * @covers MvlabsLumber\Service\Logger::debug

@@ -14,21 +14,23 @@ return array(
 
 	'lumber' => array(
 
+		'writers' => array(
+			'primary' => array(
+				'type' => 'file',
+				'destination' => __DIR__ . '../../../../../../data/application.log',
+				'min_severity' => 'debug',
+				'propagate' => true,
+			),
+		),
+
 		'channels' => array(
 			'default' => array(
 				'writers' => array(
-					'primario' => array(
-									'type' => 'file',
-									'destination' => __DIR__ . '../../../../../../data/application.log',
-									'min_severity' => 'debug',
-							        'propagate' => true,
-									'avoid_duplicates' => true,
-					              ),
-				),
-
+					'primary'
+				)
 			),
-
 		),
+
 	),
 
 );

@@ -140,6 +140,64 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    /**
+     * Writers param in conf contains invalid data
+     *
+     * @expectedException \UnexpectedValueException
+     * @expectedExceptionMessage Writers configuration argument is not an array as expected
+     */
+    public function testInvalidWriters() {
+
+    	$this->I_factory = new LoggerFactory();
+    	$I_mockSM = $this->getMockSM();
+    	$I_logger = $this->I_factory->createService($I_mockSM);
+
+    }
+
+    /**
+     * Configured writer has not been defined
+     *
+     * @expectedException \UnexpectedValueException
+     * @expectedExceptionMessage Requested writer writerdoesnotexist not found in Lumber configuration
+     */
+    public function testWriterNotExisting() {
+
+    	$this->I_factory = new LoggerFactory();
+    	$I_mockSM = $this->getMockSM();
+    	$I_logger = $this->I_factory->createService($I_mockSM);
+
+    }
+
+
+    /**
+     * Multiple channels are created
+     */
+    public function testMultipleChannels() {
+
+    	$this->I_factory = new LoggerFactory();
+    	$I_mockSM = $this->getMockSM();
+    	$I_logger = $this->I_factory->createService($this->I_mockSM);
+
+    	$aI_channels = $I_logger->getChannels();
+
+		$I_channel1 = $aI_channels['default'];
+
+		// Propagate is true
+		$I_writerOne = $I_channel1->popHandler();
+		$this->assertFalse($I_writerOne->getBubble());
+
+		// Propagate is false
+		$I_writerTwo = $I_channel1->popHandler();
+		$this->assertTrue($I_writerTwo->getBubble());
+
+		$I_channel2 = $aI_channels['secondary'];
+
+		// Default (propagate is true)
+		$I_writerOne = $I_channel2->popHandler();
+		$this->assertFalse($I_writerOne->getBubble());
+
+    }
+
 
     /**
      * Multiple writers with propagation is set to on (first) and off (next two)
