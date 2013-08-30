@@ -17,6 +17,7 @@ namespace MvlabsLumber\Service;
 
 use Monolog;
 use Psr\Log\LoggerInterface;
+use Zend\Barcode\Exception\OutOfRangeException;
 
 class Logger implements LoggerInterface {
 
@@ -105,7 +106,32 @@ class Logger implements LoggerInterface {
 	 * @param Monolog\Logger $I_channel Monolog Logger instance
 	 */
 	public function addChannel($s_channelName, Monolog\Logger $I_channel) {
-		$aI_channels[$s_channelName] = $I_channel;
+		$this->aI_channels[$s_channelName] = $I_channel;
+	}
+
+
+	/**
+	 * Lists currently registered channels
+	 *
+	 * @return array currently registered channels (Monolog instances)
+	 */
+	public function getChannels() {
+		return $this->aI_channels;
+	}
+
+
+	/**
+	 * Gets a spcific channel
+	 *
+	 * @param string $s_channelName Channel name
+	 */
+	public function getChannel($s_channelName) {
+
+		if (!array_key_exists($s_channelName, $this->aI_channels)) {
+			throw new \UnexpectedValueException('Channel ' . $s_channelName . ' does not exist');
+		}
+
+		return $this->aI_channels[$s_channelName];
 	}
 
 
@@ -115,17 +141,12 @@ class Logger implements LoggerInterface {
 	 * @param string $s_channelName Channel name
 	 */
 	public function removeChannel($s_channelName) {
-		unlink($aI_channels[$s_channelName]);
-	}
 
+		if (!array_key_exists($s_channelName, $this->aI_channels)) {
+			throw new \UnexpectedValueException('Channel ' . $s_channelName . ' does not exist. Cannot remove it');
+		}
 
-	/**
-	 * Lists currently registered channels
-	 *
-	 * @return array currently registered channels (Monolog instances)
-	 */
-	public function listChannels() {
-		return $this->aI_channels;
+		unset($this->aI_channels[$s_channelName]);
 	}
 
 
@@ -140,7 +161,7 @@ class Logger implements LoggerInterface {
     public function log($s_message, $s_level = 'notice', array $am_context = array()) {
 
     	foreach ($this->aI_channels as $s_channelName => $I_channel) {
-    		$this->addRecord($this->as_monologLevels[$s_level], $s_message, $am_context);
+    		$I_channel->addRecord($this->as_monologLevels[$s_level], $s_message, $am_context);
     	}
 
 
@@ -234,7 +255,7 @@ class Logger implements LoggerInterface {
      * @return null
      */
     public function info($s_message, array $am_context = array()) {
-    	$this->log($s_message, self::INFO, $s_message, $am_context);
+    	$this->log($s_message, self::INFO, $am_context);
     }
 
     /**
