@@ -19,6 +19,7 @@ use MvlabsLumberTest\Service\MockConfigs\MockConfigs;
 
 class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
 
+
     /**
      * @var \Zend\ServiceManager\ServiceLocatorInterface
      */
@@ -37,8 +38,17 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
      * Prepare the objects to be tested.
      */
     protected function setUp() {
+
     	$this->I_mockSM =  \Mockery::mock('Zend\ServiceManager\ServiceManager');
     	$this->I_mockConfig = new MockConfigs();
+
+    }
+
+
+    protected function tearDown() {
+
+    	\Mockery::close();
+
     }
 
 
@@ -49,9 +59,11 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
      * @expectedExceptionMessage There seems to be no configuration for Lumber. Cannot continue execution
      */
     public function testMissingConf() {
+
     	$this->I_factory = new LoggerFactory();
     	$I_mockSM = $this->getMockSM();
     	$this->I_factory->createService($this->I_mockSM);
+
     }
 
 
@@ -62,33 +74,40 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
      * @expectedExceptionMessage Channel configuration for Lumber ("lumber" key) seems to be empty or invalid
      */
     public function testInvalidConf() {
+
     	$this->I_factory = new LoggerFactory();
     	$I_mockSM = $this->getMockSM();
     	$this->I_factory->createService($this->I_mockSM);
-    }
 
-
-    /**
-     * An invalid writer is requested, an exception is thrown
-     *
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid type for writer
-     */
-    public function testInvalidWriterType() {
-    	$this->I_factory = new LoggerFactory();
-		$I_mockSM = $this->getMockSM();
-    	$this->I_factory->createService($this->I_mockSM);
     }
 
 
     /**
      * A logger with basic conf
+     *
+     * This is the simplest default configuration for Lumber
      */
      public function testWorkingFileWriter() {
+
      	$this->I_factory = new LoggerFactory();
     	$I_mockSM = $this->getMockSM();
+
     	$I_logger = $this->I_factory->createService($I_mockSM);
+
+    	// Have we created an instance of our Logger?
     	$this->assertInstanceOf('MvlabsLumber\Service\Logger', $I_logger);
+
+    	// Have we created the default channel?
+    	$I_channel = $I_logger->getChannel('default');
+    	$this->assertInstanceOf('Monolog\Logger', $I_channel);
+
+    	// Does it have a writer?
+    	$I_handler = $I_channel->popHandler();
+    	$this->assertInstanceOf('Monolog\Handler\AbstractHandler', $I_handler);
+
+    	// Is it the writer configured to bubble?
+    	$this->assertTrue($I_handler->getBubble());
+
     }
 
 
@@ -99,9 +118,11 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
      * @expectedExceptionMessage Can not continue writing to
      */
     public function testWrongFileLocationFileWriter() {
+
     	$this->I_factory = new LoggerFactory();
     	$I_mockSM = $this->getMockSM();
     	$I_logger = $this->I_factory->createService($I_mockSM);
+
     }
 
 
@@ -120,23 +141,35 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     }
 
 
-	/**
-	 * Event shall be propagated after first writer has handled it
-	 *
-	 *  Testing that Monolog bubble property has been set to true
-	 */
-    public function testPropagateOn() {
-    	$this->markTestIncomplete('To be implemented');
-    }
-
-
     /**
-     * Event shall not be propagated after first writer has handled it
-     *
-     *  Testing that Monolog bubble property has been set to false
+     * Multiple writers with propagation is set to on (first) and off (next two)
      */
-    public function testPropagateOff() {
-   		$this->markTestIncomplete('To be implemented');
+    public function testMultipleWriters() {
+
+    	$this->I_factory = new LoggerFactory();
+    	$I_mockSM = $this->getMockSM();
+    	$I_logger = $this->I_factory->createService($this->I_mockSM);
+
+    	$aI_channels = $I_logger->getChannels();
+
+		$I_channel = $aI_channels['default'];
+
+		// Propagate is true
+		$I_writerOne = $I_channel->popHandler();
+		$this->assertFalse($I_writerOne->getBubble());
+
+		// Propagate is false
+		$I_writerTwo = $I_channel->popHandler();
+		$this->assertTrue($I_writerTwo->getBubble());
+
+		// Default (propagate is true)
+		$I_writerThree = $I_channel->popHandler();
+		$this->assertFalse($I_writerThree->getBubble());
+
+		// Propagate is false
+		$I_writerFour = $I_channel->popHandler();
+		$this->assertTrue($I_writerFour->getBubble());
+
     }
 
 
@@ -150,7 +183,6 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     	$s_confToLoad = lcfirst(substr($am_trace[1]['function'], 4));
 
     	$am_serviceConf = $this->I_mockConfig->getConf($s_confToLoad);
-    	$this->I_mockSM->shouldReceive('setService')->with('Config',$am_serviceConf)->once();
     	$this->I_mockSM->shouldReceive('get')->with('Config')->once()->andReturn($am_serviceConf);
 
     	return $this->I_mockSM;

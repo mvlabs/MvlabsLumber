@@ -112,6 +112,44 @@ class MockConfigs {
     );
 
 
+  	/**
+  	 * Multiple writers
+  	 * @var array
+  	 */
+  	protected $am_multipleWriters = array (
+  			'lumber' => array(
+  					'channels' => array(
+  							'default' => array(
+  									'writers' => array(
+  											'default' => array(
+  													'type' => 'file',
+  													'destination' => '/tmp/test.log',
+  													'min_severity' => 'info',
+  													'propagate' => true,
+  											),
+  											'second' => array(
+  													'type' => 'file',
+  													'destination' => '/tmp/test2.log',
+  													'min_severity' => 'info',
+  													'propagate' => false,
+  											),
+  											'third' => array(
+  													'type' => 'file',
+  													'destination' => '/tmp/test3.log',
+  													'min_severity' => 'info',
+  											),
+  											'fourth' => array(
+  													'type' => 'file',
+  													'destination' => '/tmp/test4.log',
+  													'min_severity' => 'info',
+  													'propagate' => false,
+  											),
+  									),
+  							),
+  					),
+  			),
+  	);
+
 
 	/**
 	 * Returns requested config
