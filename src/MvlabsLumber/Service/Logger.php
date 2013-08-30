@@ -17,7 +17,6 @@ namespace MvlabsLumber\Service;
 
 use Monolog;
 use Psr\Log\LoggerInterface;
-use Zend\Barcode\Exception\OutOfRangeException;
 
 class Logger implements LoggerInterface {
 
