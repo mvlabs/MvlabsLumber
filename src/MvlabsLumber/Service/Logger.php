@@ -84,7 +84,7 @@ class Logger implements LoggerInterface {
 	 * @param mixed $m_level Level to be evaluated
 	 * @return boolean Is level valid?
 	 */
-	public static function isValidLevel($m_level) {
+	public static function isValidSeverityLevel($m_level) {
 
 		$am_validLevels = self::getSeverityLevels();
 

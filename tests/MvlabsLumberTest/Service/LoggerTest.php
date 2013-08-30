@@ -52,6 +52,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * Tests channel addition
+     * @covers MvlabsLumber\Service\Logger::addChannel
      */
     public function testAddChannel() {
 
@@ -65,30 +66,44 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * Get a list of logger channels
+     * @covers MvlabsLumber\Service\Logger::getChannels
+     * @covers MvlabsLumber\Service\Logger::getChannel
      */
     public function testListChannels() {
 
+    	$I_logger = $this->I_logger;
+
     	// Lumber has no channels upfront
-		$this->assertEmpty($this->I_logger->getChannels());
+		$this->assertEmpty($I_logger->getChannels());
 
 		// Default channel is added
-		$this->I_logger->addChannel('default', $this->I_mockMonologLogger);
-		$this->I_logger->addChannel('second', $this->I_mockMonologLogger);
+		$I_logger->addChannel('default', $this->I_mockMonologLogger);
+		$I_logger->addChannel('second', $this->I_mockMonologLogger);
 
-		$aI_channels = $this->I_logger->getChannels();
+		// getChannels is tested
+		$aI_channels = $I_logger->getChannels();
 		$this->assertCount(2, $aI_channels);
 
-		$I_default = $aI_channels["default"];
-		$I_second = $aI_channels["second"];
+		$I_default = $aI_channels['default'];
+		$I_second = $aI_channels['second'];
 
 		$this->assertInstanceOf("Monolog\Logger", $I_default);
 		$this->assertInstanceOf("Monolog\Logger", $I_second);
+
+		// getChannel is tested
+		$I_defaultDirect = $I_logger->getChannel('default');
+		$I_secondDirect = $I_logger->getChannel('second');
+
+		$this->assertInstanceOf("Monolog\Logger", $I_defaultDirect);
+		$this->assertInstanceOf("Monolog\Logger", $I_secondDirect);
 
     }
 
 
     /**
      * Tests channel removal
+     *
+     * @covers MvlabsLumber\Service\Logger::removeChannel
      */
     public function testRemoveChannel() {
 
@@ -99,10 +114,10 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
     	// Default channel is added
     	$s_channelName = 'default';
-    	$this->I_logger->addChannel($s_channelName, $this->I_mockMonologLogger);
+    	$I_logger->addChannel($s_channelName, $this->I_mockMonologLogger);
 
     	// Second channel is added
-    	$this->I_logger->addChannel('second', $this->I_mockMonologLogger);
+    	$I_logger->addChannel('second', $this->I_mockMonologLogger);
 
     	$this->assertCount(2, $I_logger->getChannels());
     	$this->assertArrayHasKey($s_channelName, $I_logger->getChannels());
@@ -135,23 +150,6 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
 
     /**
-     * Returns requested channel
-     *
-     */
-    public function testGetChannel() {
-
-    	$I_logger = $this->I_logger;
-
-    	// Default channel is fetched
-    	$this->I_logger->addChannel('default', $this->I_mockMonologLogger);
-    	$I_channel = $I_logger->getChannel('default');
-
-    	$this->assertInstanceOf('Monolog\Logger', $I_channel);
-
-    }
-
-
-    /**
      * Returns a specific logging channel
      * @expectedException \UnexpectedValueException
      * @expectedExceptionMessage Channel default does not exist
@@ -171,6 +169,16 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
      *
      * This is the only place where I accept violating DRY
      * for the sake of clarity
+     *
+     * @covers MvlabsLumber\Service\Logger::log
+     * @covers MvlabsLumber\Service\Logger::debug
+     * @covers MvlabsLumber\Service\Logger::info
+     * @covers MvlabsLumber\Service\Logger::notice
+     * @covers MvlabsLumber\Service\Logger::warning
+     * @covers MvlabsLumber\Service\Logger::error
+     * @covers MvlabsLumber\Service\Logger::critical
+     * @covers MvlabsLumber\Service\Logger::alert
+     * @covers MvlabsLumber\Service\Logger::emergency
      */
     public function testIsEventSentToLogger() {
 
@@ -242,6 +250,8 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * Tests available severity levels
+     *
+     * @covers MvlabsLumber\Service\Logger::getSeverityLevels
      */
     public function testSeverityLevels() {
     	$this->assertTrue(($this->getPsrSeverityLevels() == $this->I_logger->getSeverityLevels()));
@@ -250,11 +260,13 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
     /**
      * Tests severity level is set
+     *
+     * @covers MvlabsLumber\Service\Logger::isValidSeverityLevel
      */
     public function testIsSeverityValid() {
 
-    	$this->assertTrue($this->I_logger->isValidLevel('info'));
-    	$this->assertFalse($this->I_logger->isValidLevel('fun'));
+    	$this->assertTrue($this->I_logger->isValidSeverityLevel('info'));
+    	$this->assertFalse($this->I_logger->isValidSeverityLevel('fun'));
 
     }
 
