@@ -102,6 +102,9 @@ class LoggerFactory implements FactoryInterface {
     		$b_bubble = true;
     	}
 
+    	// This is because of Monolog concept of bubble true/false
+    	$b_bubble = !$b_bubble;
+
     	// What kind of writer shall we create?
     	switch($am_writerConf['type']) {
 
@@ -117,6 +120,8 @@ class LoggerFactory implements FactoryInterface {
     			// @TODO: Improve for testability. Get writer out of service manager, instead of creating it here...
     			$I_writer = new StreamHandler($am_writerConf["destination"], $s_logAbove, $b_bubble);
     			break;
+
+    		// @TODO: Implement configurartion handling for all other Monolog Handlers
 
     		default:
 
