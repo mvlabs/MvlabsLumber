@@ -28,6 +28,7 @@ class LoggerFactory implements FactoryInterface {
 	 */
 	protected $I_serviceLocator;
 
+
     /**
      * {@inheritDoc}
      *
@@ -82,7 +83,15 @@ class LoggerFactory implements FactoryInterface {
     }
 
 
-
+	/**
+	 * Gets configured writer (a Monolog handler)
+	 *
+	 * @param string $s_writerName Handler name
+	 * @param array $am_writerConf Handler configuration
+	 * @throws \InvalidArgumentException
+	 * @throws \OutOfRangeException
+	 * @return \Monolog\Handler\AbstractHandler Configured Monolog handler
+	 */
     private function getConfiguredWriter($s_writerName, $am_writerConf) {
 
 		// Minimum logging level for writer needs to be specified
@@ -92,7 +101,7 @@ class LoggerFactory implements FactoryInterface {
 
 		// Is minimum logging level valid?
     	$s_logAbove = $am_writerConf['min_severity'];
-    	if (!Logger::isValidLevel($s_logAbove)) {
+    	if (!Logger::isValidSeverityLevel($s_logAbove)) {
     		throw new \OutOfRangeException('Invalid logging level ' . $s_logAbove . ' for writer ' . $s_writerName);
     	}
 
@@ -101,9 +110,6 @@ class LoggerFactory implements FactoryInterface {
     	if (null === $b_bubble) {
     		$b_bubble = true;
     	}
-
-    	// This is because of Monolog concept of bubble true/false
-    	$b_bubble = !$b_bubble;
 
     	// What kind of writer shall we create?
     	switch($am_writerConf['type']) {
@@ -117,11 +123,11 @@ class LoggerFactory implements FactoryInterface {
     				throw new \InvalidArgumentException('Can not continue writing to ' . $s_filePath . ' in writer ' . $s_writerName . ' of type ' . $am_writerConf['type'] . ' in Lumber configuration');
     			}
 
-    			// @TODO: Improve for testability. Get writer out of service manager, instead of creating it here...
+    			// @TODO: Improve for testability. Get writer out of service manager, instead of creating it here
     			$I_writer = new StreamHandler($am_writerConf["destination"], $s_logAbove, $b_bubble);
     			break;
 
-    		// @TODO: Implement configurartion handling for all other Monolog Handlers
+    		// @TODO: Implement configurartion handling for all other supported Monolog Handlers
 
     		default:
 
@@ -154,7 +160,6 @@ class LoggerFactory implements FactoryInterface {
     	return $m_paramValue;
 
     }
-
 
 
 }
