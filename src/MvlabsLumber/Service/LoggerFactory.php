@@ -28,6 +28,18 @@ class LoggerFactory implements FactoryInterface {
 	 */
 	protected $I_serviceLocator;
 
+	/**
+	 * Writers created from configuration
+	 * @var array Available writers
+	 */
+	protected $aI_writers = array();
+
+	/**
+	 * Raw writers configuration (from app conf)
+	 * @var array Writers configuration
+	 */
+	protected $am_writersConf = array();
+
 
     /**
      * {@inheritDoc}
@@ -36,7 +48,6 @@ class LoggerFactory implements FactoryInterface {
      */
     public function createService(ServiceLocatorInterface $I_serviceLocator)    {
 
-    	// ZF2 Service Manager
     	$this->I_serviceLocator = $I_serviceLocator;
 
     	// Application config
@@ -53,6 +64,22 @@ class LoggerFactory implements FactoryInterface {
 			throw new \UnexpectedValueException('Channel configuration for Lumber ("lumber" key) seems to be empty or invalid');
 		}
 
+		// Writers conf is "cached" in order to avoid other calls to SM
+		if (array_key_exists('writers', $am_loggerConf)) {
+
+			if (!is_array($am_loggerConf["writers"])) {
+				throw new \UnexpectedValueException('Writers configuration argument is not an array as expected');
+			}
+
+			foreach ($am_loggerConf["writers"] as $s_writerName => $am_writerConf) {
+				if (array_key_exists($s_writerName, $this->am_writersConf)) {
+					throw new \UnexpectedValueException('Writer ' . $s_writerName . ' has been declared more than once in Lumber configuration');
+				}
+				$this->am_writersConf[$s_writerName] = $am_writerConf;
+			}
+
+		}
+
 		// Lumber logger is created
 		$I_logger = new Logger();
 
@@ -65,10 +92,10 @@ class LoggerFactory implements FactoryInterface {
 				throw new \UnexpectedValueException('Configuration for Lumber channel ' . $s_channelName . ' seems to be empty. Cannot continue');
 			}
 
-			foreach ($am_channelInfo['writers'] as $s_writerName => $am_writerInfo) {
+			foreach ($am_channelInfo['writers'] as $s_writerName) {
 
 				// Proper writer is setup and returned
-				$I_writer = $this->getConfiguredWriter($s_writerName, $am_writerInfo);
+				$I_writer = $this->getConfiguredWriter($s_writerName);
 
 				// Writer is added to Monolog channel
 				$I_channel->pushHandler($I_writer);
@@ -92,7 +119,19 @@ class LoggerFactory implements FactoryInterface {
 	 * @throws \OutOfRangeException
 	 * @return \Monolog\Handler\AbstractHandler Configured Monolog handler
 	 */
-    private function getConfiguredWriter($s_writerName, $am_writerConf) {
+    private function getConfiguredWriter($s_writerName) {
+
+    	if (array_key_exists($s_writerName, $this->aI_writers)) {
+    		return $this->aI_writers[$s_writerName];
+    	}
+
+    	$am_writersConf = $this->am_writersConf;
+
+    	if (!array_key_exists($s_writerName, $am_writersConf)) {
+    		throw new \UnexpectedValueException('Requested writer ' . $s_writerName . ' not found in Lumber configuration');
+    	}
+
+    	$am_writerConf = $am_writersConf[$s_writerName];
 
 		// Minimum logging level for writer needs to be specified
     	if (!array_key_exists('min_severity', $am_writerConf)) {
