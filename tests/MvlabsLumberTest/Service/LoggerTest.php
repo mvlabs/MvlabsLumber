@@ -41,21 +41,19 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
      * Prepare the objects to be tested.
      */
     protected function setUp() {
-    	$this->I_mockMonologLogger =  \Mockery::mock('Monolog\Logger');
+    	
+        $this->I_mockMonologLogger =  \Mockery::mock('Monolog\Logger');
     	$this->I_logger = new Logger();
+        
     }
-
-
-    protected function tearDown() {
-		\Mockery::close();
-    }
-
+    
     /**
      * Tests channel addition
      *
      * @covers MvlabsLumber\Service\Logger::addChannel
+     * @test
      */
-    public function testAddChannel() {
+    public function CanSingleChannelBeAdded() {
 
     	// Default channel is added
     	$s_channelName = 'default';
@@ -63,13 +61,43 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
     	$this->assertArrayHasKey($s_channelName, $this->I_logger->getChannels());
 
     }
-
-
+       
+    /**
+     * @test
+     */
+    
+    public function tryGetAChannelWithCorrectChannelName(){
+        
+        $this->I_logger->addChannel('second',$this->I_mockMonologLogger);
+        $this->I_mockMonologLogger->shouldReceive("getName")->andReturn("second");
+        
+        $I_channel = $this->I_logger->getChannel('second');
+        $s_channelName = $I_channel->getName();
+        
+        $this->assertInstanceOf("Monolog\Logger", $I_channel);
+        $this->assertEquals($s_channelName, 'second');       
+    }
+    
+    /**
+     * @expectedException \UnexpectedValueException
+     * @expectedExceptionMessage Channel default does not exist
+     * @test
+     */
+    public function tryGetAChannelWithAWrongChannelName() {
+        
+        $this->I_logger->addChannel('second',$this->I_mockMonologLogger);
+        $this->I_mockMonologLogger->shouldReceive("getName")->andReturn("second");
+      
+       $this->I_logger->getChannel('default');
+       
+    }
+    
     /**
      * Get a list of logger channels
      *
      * @covers MvlabsLumber\Service\Logger::getChannels
      * @covers MvlabsLumber\Service\Logger::getChannel
+     * @test
      */
     public function testListChannels() {
 
