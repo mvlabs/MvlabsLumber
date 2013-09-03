@@ -72,9 +72,6 @@ class LoggerFactory implements FactoryInterface {
 			}
 
 			foreach ($am_loggerConf["writers"] as $s_writerName => $am_writerConf) {
-				if (array_key_exists($s_writerName, $this->am_writersConf)) {
-					throw new \UnexpectedValueException('Writer ' . $s_writerName . ' has been declared more than once in Lumber configuration');
-				}
 				$this->am_writersConf[$s_writerName] = $am_writerConf;
 			}
 
@@ -87,10 +84,6 @@ class LoggerFactory implements FactoryInterface {
 		foreach ($am_loggerConf['channels'] as $s_channelName => $am_channelInfo) {
 
 			$I_channel = new \Monolog\Logger($s_channelName);
-
-			if (!array_key_exists('writers', $am_channelInfo) || !is_array($am_channelInfo['writers']) || count($am_channelInfo['writers']) == 0) {
-				throw new \UnexpectedValueException('Configuration for Lumber channel ' . $s_channelName . ' seems to be empty. Cannot continue');
-			}
 
 			foreach ($am_channelInfo['writers'] as $s_writerName) {
 
@@ -171,10 +164,13 @@ class LoggerFactory implements FactoryInterface {
     		default:
 
     			// Only writers defined above are currently supported
-    			throw new \InvalidArgumentException('Invalid type for writer ' . $s_writerName . ' in Lumber configuration');
+    			throw new \InvalidArgumentException('Invalid type (' . $am_writerConf['type'] . ') for writer ' . $s_writerName . ' in Lumber configuration');
 				break;
 
     	}
+
+    	// No need to rebuild writer if it will be requested next
+    	$this->aI_writers[$s_writerName] = $I_writer;
 
     	return $I_writer;
 
