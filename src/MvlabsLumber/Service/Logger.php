@@ -13,6 +13,7 @@
  * @package   MvlabsLumber
  */
 
+
 namespace MvlabsLumber\Service;
 
 use Monolog\Logger as Monolog;
@@ -184,6 +185,7 @@ class Logger implements LoggerInterface {
 		$this->log($s_message, self::EMERGENCY, $am_context);
 	}
 
+
     /**
      * Action must be taken immediately.
      *
@@ -198,6 +200,7 @@ class Logger implements LoggerInterface {
     	$this->log($s_message, self::ALERT, $am_context);
     }
 
+
     /**
      * Critical conditions.
      *
@@ -211,6 +214,7 @@ class Logger implements LoggerInterface {
     	$this->log($s_message, self::CRITICAL, $am_context);
     }
 
+
     /**
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
@@ -222,6 +226,7 @@ class Logger implements LoggerInterface {
     public function error($s_message, array $am_context = array()) {
     	$this->log($s_message, self::ERROR, $am_context);
     }
+
 
     /**
      * Exceptional occurrences that are not errors.
@@ -237,6 +242,7 @@ class Logger implements LoggerInterface {
     	$this->log($s_message, self::WARNING, $am_context);
     }
 
+
     /**
      * Normal but significant events.
      *
@@ -247,6 +253,7 @@ class Logger implements LoggerInterface {
     public function notice($s_message, array $am_context = array()) {
     	$this->log($s_message, self::NOTICE, $am_context);
     }
+
 
     /**
      * Interesting events.
@@ -260,6 +267,7 @@ class Logger implements LoggerInterface {
     public function info($s_message, array $am_context = array()) {
     	$this->log($s_message, self::INFO, $am_context);
     }
+
 
     /**
      * Detailed debug information.

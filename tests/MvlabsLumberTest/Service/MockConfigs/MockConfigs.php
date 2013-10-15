@@ -135,6 +135,106 @@ class MockConfigs {
 	);
 
 
+
+    /**
+     * Working FirePHP writer configuration
+     * @var array Lumber configuration
+     */
+    protected $am_zendMonitorWriterWithoutExtension = array (
+
+    		'lumber' => array(
+
+    				'writers' => array(
+    						'zendmonitor' => array(
+    								'type' => 'zendmonitor',
+    								'min_severity' => 'notice',
+    						),
+    				),
+    				'channels' => array(
+    						'default' => array(
+    								'writers' => array(
+    										'zendmonitor'
+    								),
+    						),
+    				),
+
+    		),
+
+    );
+
+
+
+
+
+    /**
+     * Working FirePHP writer configuration
+     * @var array Lumber configuration
+     */
+    protected $am_workingWriters = array (
+
+    		'lumber' => array(
+
+    				'writers' => array(
+    						'file' => array(
+    								'type' => 'file',
+    								'destination' => '/tmp/test.log',
+    								'min_severity' => 'notice',
+    						),
+    						'stream' => array(
+    								'type' => 'stream',
+    								'destination' => '/tmp/test2.log',
+    								'min_severity' => 'notice',
+    						),
+    						'firephp' => array(
+    								'type' => 'firephp',
+    								'min_severity' => 'notice',
+    						),
+    						'chrome' => array(
+    								'type' => 'chromephp',
+    								'min_severity' => 'notice',
+    						),
+    						'couchdb' => array(
+    								'type' => 'couchdb',
+    								'min_severity' => 'notice',
+    								'options' => array('host' => 'localhost')
+    						),
+    						'phplog' => array(
+    								'type' => 'phplog',
+    								'min_severity' => 'notice',
+    						),
+    						'syslog' => array(
+    								'type' => 'syslog',
+    								'min_severity' => 'notice',
+    								'ident' => 'lumber-test',
+    								'facility' => 'user',
+    						),
+    						'rotatingfile' => array(
+    							'type' => 'rotatingfile',
+    							'destination' => '/tmp/rotated.log',
+    							'min_severity' => 'notice',
+    							'days_kept' => 10,
+    						),
+
+    				),
+    			    'channels' => array(
+    			    	'default' => array(
+    								'writers' => array(
+    										'file',
+    										'stream',
+    										'firephp',
+    										'chrome',
+    										'couchdb',
+    										'phplog',
+    										'syslog',
+    								),
+    						),
+    				),
+
+    		),
+
+    );
+
+
 	/**
 	 * Valid file writer configuration, but file is not writable
 	 * @var array Lumber configuration
@@ -309,7 +409,25 @@ class MockConfigs {
 	 * @param string $s_name configuration to be returned
 	 */
     public function getConf($s_name) {
+
     		$s_confNameVar = 'am_'. $s_name;
+
+    		if ('workingWriters' == $s_name &&
+    		    function_exists('zend_monitor_custom_event')) {
+
+    			$am_tempConf = $this->$s_confNameVar;
+    			$am_tempConf['lumber']['writers']['zendmonitor'] =
+			    			array(
+			    					'type' => 'zendmonitor',
+			    					'min_severity' => 'notice',
+			    			);
+
+    			$am_tempConf['lumber']['channels']['default']['writers'][] = 'zendmonitor';
+
+    			return $am_tempConf;
+
+    		}
+
 	    	return $this->$s_confNameVar;
 	}
 
