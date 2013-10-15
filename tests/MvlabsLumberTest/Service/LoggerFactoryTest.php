@@ -74,7 +74,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
 
 
     /**
-     * Logging to FirePHP
+     * Logging to all valid writers
      *
      */
     public function testWorkingWriters() {
