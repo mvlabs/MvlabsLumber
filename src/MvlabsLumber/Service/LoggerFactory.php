@@ -16,6 +16,7 @@ namespace MvlabsLumber\Service;
 
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Monolog\Logger as Monolog;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\FirePHPHandler;
 use Monolog\Handler\CouchDBHandler;
@@ -83,7 +84,7 @@ class LoggerFactory implements FactoryInterface {
 		// Channels and writers are registered for this logger
 		foreach ($am_loggerConf['channels'] as $s_channelName => $am_channelInfo) {
 
-			$I_channel = new \Monolog\Logger($s_channelName);
+			$I_channel = new Monolog($s_channelName);
 
 			foreach ($am_channelInfo['writers'] as $s_writerName) {
 

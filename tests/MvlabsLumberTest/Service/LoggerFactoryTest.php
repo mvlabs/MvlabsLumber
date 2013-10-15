@@ -45,13 +45,6 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     }
 
 
-    protected function tearDown() {
-
-    	\Mockery::close();
-
-    }
-
-
     /**
      * Empty configuration is passed, an exception is thrown
      *

@@ -273,6 +273,24 @@ class LoggerTest extends \PHPUnit_Framework_TestCase {
 
 
     /**
+     *
+     * @covers MvlabsLumber\Service\Logger::log
+     * @expectedException \OutOfRangeException
+     * @expectedExceptionMessage Severity level notExistingSeverityLevel is invalid and can not be used
+     * @test
+     */
+    public function isLoggingSeverityNotExisting() {
+
+    	$I_logger = $this->I_logger;
+
+    	// Default channel is added
+    	$I_logger->addChannel('default', $this->I_mockMonologLogger);
+    	$I_logger->log("Won't be logged anyways", 'notExistingSeverityLevel');
+
+    }
+
+
+    /**
      * @covers MvlabsLumber\Service\Logger::getSeverityLevels
      * @test
      */
