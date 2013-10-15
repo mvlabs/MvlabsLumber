@@ -10,14 +10,30 @@
  * @package   MvlabsLumber
  */
 
+namespace Zend\Mvc;
+
 return array(
 
+
 	'lumber' => array(
+
+		'events' => array(
+
+						'application_errors' => array('event' => MvcEvent::EVENT_DISPATCH_ERROR,
+								                      'severity' => 'alert',
+						                        ),
+
+						'custom_handler' => array('event' => 'invocato',
+												  'target' => 'Application\Controller\ErrorController',
+												  'verbose' => true,
+						),
+
+					),
 
 		'writers' => array(
 			'primary' => array(
 				'type' => 'file',
-				'destination' => __DIR__ . '../../../../../../data/application.log',
+				'destination' => __DIR__ . '/../../../../data/application.log',
 				'min_severity' => 'debug',
 				'propagate' => true,
 			),
@@ -32,5 +48,13 @@ return array(
 		),
 
 	),
+
+
+	'service_manager' => array(
+			'factories' => array(
+					'MvlabsLumber\Service\Logger' => 'MvlabsLumber\Service\LoggerFactory',
+			),
+	),
+
 
 );

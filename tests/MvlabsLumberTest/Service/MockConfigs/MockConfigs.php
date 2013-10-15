@@ -163,6 +163,32 @@ class MockConfigs {
 
 
     /**
+     * No severity specified
+     * @var array Lumber configuration
+     */
+    protected $am_noSeveritySet = array (
+
+    		'lumber' => array(
+
+    				'writers' => array(
+    						'default' => array(
+    								'type' => 'file',
+    								'destination' => '/tmp/test.log',
+    						),
+    				),
+
+    				'channels' => array(
+    						'default' => array(
+    								'writers' => array(
+    										'default'
+    								),
+    						),
+    				),
+    		),
+    );
+
+
+    /**
      * Invalid logging level
      * @var array Lumber configuration
      */

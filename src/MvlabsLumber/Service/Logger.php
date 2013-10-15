@@ -15,7 +15,7 @@
 
 namespace MvlabsLumber\Service;
 
-use Monolog;
+use Monolog\Logger as Monolog;
 use Psr\Log\LoggerInterface;
 
 class Logger implements LoggerInterface {
@@ -104,7 +104,7 @@ class Logger implements LoggerInterface {
 	 * @param string $s_channelName Channel name
 	 * @param Monolog\Logger $I_channel Monolog Logger instance
 	 */
-	public function addChannel($s_channelName, Monolog\Logger $I_channel) {
+	public function addChannel($s_channelName, Monolog $I_channel) {
 		$this->aI_channels[$s_channelName] = $I_channel;
 	}
 
@@ -153,18 +153,22 @@ class Logger implements LoggerInterface {
      * Logs with severity level to all registered channels
      *
      * @param string $s_message Main message content
-     * @param mixed $s_level Message severity level. Default is info, as commonly found in logger implementations
+     * @param mixed $s_level Message severity level. Default is null, which will result in info, as commonly found in logger implementations
      * @param array $am_context Message context - IE Additional information
      * @return null
      */
     public function log($s_message, $s_level = 'notice', array $am_context = array()) {
 
+    	if (!$this->isValidSeverityLevel($s_level)) {
+    		throw new \OutOfRangeException('Severity level ' . $s_level . ' is invalid and can not be used');
+    	}
+
     	foreach ($this->aI_channels as $s_channelName => $I_channel) {
     		$I_channel->addRecord($this->as_monologLevels[$s_level], $s_message, $am_context);
     	}
 
-
     }
+
 
 	/**
 	 * Action must be taken immediately.

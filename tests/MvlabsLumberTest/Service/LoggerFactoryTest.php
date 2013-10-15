@@ -45,13 +45,6 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     }
 
 
-    protected function tearDown() {
-
-    	\Mockery::close();
-
-    }
-
-
     /**
      * Empty configuration is passed, an exception is thrown
      *
@@ -61,8 +54,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     public function testMissingConf() {
 
     	$this->I_factory = new LoggerFactory();
-    	$I_mockSM = $this->getMockSM();
-    	$this->I_factory->createService($this->I_mockSM);
+    	$this->I_factory->createService($this->getMockSM());
 
     }
 
@@ -76,8 +68,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     public function testInvalidConf() {
 
     	$this->I_factory = new LoggerFactory();
-    	$I_mockSM = $this->getMockSM();
-    	$this->I_factory->createService($this->I_mockSM);
+    	$this->I_factory->createService($this->getMockSM());
 
     }
 
@@ -90,9 +81,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
      public function testWorkingFileWriter() {
 
      	$this->I_factory = new LoggerFactory();
-    	$I_mockSM = $this->getMockSM();
-
-    	$I_logger = $this->I_factory->createService($I_mockSM);
+    	$I_logger = $this->I_factory->createService($this->getMockSM());
 
     	// Have we created an instance of our Logger?
     	$this->assertInstanceOf('MvlabsLumber\Service\Logger', $I_logger);
@@ -120,8 +109,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     public function testWrongFileLocationFileWriter() {
 
     	$this->I_factory = new LoggerFactory();
-    	$I_mockSM = $this->getMockSM();
-    	$I_logger = $this->I_factory->createService($I_mockSM);
+    	$this->I_factory->createService($this->getMockSM());
 
     }
 
@@ -135,10 +123,10 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     public function testWrongLogLevel() {
 
     	$this->I_factory = new LoggerFactory();
-    	$I_mockSM = $this->getMockSM();
-    	$I_logger = $this->I_factory->createService($I_mockSM);
+    	$this->I_factory->createService($this->getMockSM());
 
     }
+
 
     /**
      * Writers param in conf contains invalid data
@@ -149,10 +137,24 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     public function testInvalidWriters() {
 
     	$this->I_factory = new LoggerFactory();
-    	$I_mockSM = $this->getMockSM();
-    	$I_logger = $this->I_factory->createService($I_mockSM);
+    	$this->I_factory->createService($this->getMockSM());
 
     }
+
+
+    /**
+     * Invalid writer type specified
+     *
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Invalid type (someWritersWhichDoesntExistAndNeverWill) for writer default in Lumber configuration
+     */
+    public function testInvalidWriterType() {
+
+    	$this->I_factory = new LoggerFactory();
+    	$this->I_factory->createService($this->getMockSM());
+
+    }
+
 
     /**
      * Configured writer has not been defined
@@ -163,8 +165,21 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     public function testWriterNotExisting() {
 
     	$this->I_factory = new LoggerFactory();
-    	$I_mockSM = $this->getMockSM();
-    	$I_logger = $this->I_factory->createService($I_mockSM);
+    	$this->I_factory->createService($this->getMockSM());
+
+    }
+
+
+    /**
+     * No severity has been set for a writer
+     *
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Writer default needs parameter log_above to be set
+     */
+    public function testNoSeveritySet() {
+
+    	$this->I_factory = new LoggerFactory();
+    	$this->I_factory->createService($this->getMockSM());
 
     }
 
@@ -175,8 +190,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     public function testMultipleChannels() {
 
     	$this->I_factory = new LoggerFactory();
-    	$I_mockSM = $this->getMockSM();
-    	$I_logger = $this->I_factory->createService($this->I_mockSM);
+    	$I_logger = $this->I_factory->createService($this->getMockSM());
 
     	$aI_channels = $I_logger->getChannels();
 
@@ -205,8 +219,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     public function testMultipleWriters() {
 
     	$this->I_factory = new LoggerFactory();
-    	$I_mockSM = $this->getMockSM();
-    	$I_logger = $this->I_factory->createService($this->I_mockSM);
+    	$I_logger = $this->I_factory->createService($this->getMockSM());
 
     	$aI_channels = $I_logger->getChannels();
 
