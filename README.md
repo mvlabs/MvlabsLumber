@@ -2,6 +2,6 @@ MvlabsLumber
 ============
 
 A logging module for Zend Framework 2 based on the Monolog library.
-In DEVELOPMENT, do NOT use in PRODUCTION environments (yet).
+Current status is BETA, Use in PRODUCTION environments at your own risk.
 
-Expected release date (updated) 15/10/2013.
+Expected (documented) production release date is 31/10/2013.
