@@ -13,10 +13,10 @@
 
 namespace MvlabsLumber;
 
-use Zend\Mvc\ModuleRouteListener;
 use Zend\EventManager\Event;
 use Zend\Mvc\ApplicationInterface;
 use Zend\Mvc\MvcEvent;
+use Zend\Mvc\ModuleRouteListener;
 
 
 /**
@@ -129,6 +129,7 @@ class Module {
 						$as_messages[] = $am_params['message'];
 					}
 
+					// Exceptions need to be made human readable
 					if (array_key_exists('exception', $am_params) &&
 					    $am_params['exception'] instanceof \Exception) {
 
@@ -136,6 +137,8 @@ class Module {
 						do {
 
 							$as_messages[] = $I_exception->getMessage();
+
+							// Shall we also include exception traces?
 							if($b_verbose) {
 								$am_traces = $I_exception->getTrace();
 								foreach ($am_traces as $am_trace) {
@@ -169,6 +172,12 @@ class Module {
 	}
 
 
+	/**
+	 * Support function extracting configuration event information
+	 *
+	 * @param array event configuration record $am_eventInfo
+	 * @return array configured event info record
+	 */
 	private function getEventInfo(array $am_eventInfo) {
 
 		// Target is taken care of - empty means everything

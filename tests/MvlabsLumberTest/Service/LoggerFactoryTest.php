@@ -74,13 +74,66 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
 
 
     /**
-     * A logger with basic conf
+     * Logging to all valid writers
      *
-     * This is the simplest default configuration for Lumber
      */
-     public function testWorkingFileWriter() {
+    public function testWorkingWriters() {
 
-     	$this->I_factory = new LoggerFactory();
+    	$this->I_factory = new LoggerFactory();
+    	$I_logger = $this->I_factory->createService($this->getMockSM());
+
+    	// Have we created an instance of our Logger?
+    	$this->assertInstanceOf('MvlabsLumber\Service\Logger', $I_logger);
+
+    	// Have we created the default channel?
+    	$I_channel = $I_logger->getChannel('default');
+    	$this->assertInstanceOf('Monolog\Logger', $I_channel);
+
+    	$as_expectedWriters = array(
+    			'Monolog\Handler\ZendMonitor',
+    			'Monolog\Handler\RotatingFileHandler',
+    			'Monolog\Handler\SyslogHandler',
+    			'Monolog\Handler\ErrorLogHandler',
+    			'Monolog\Handler\CouchDBHandler',
+    			'Monolog\Handler\ChromePHPHandler',
+    			'Monolog\Handler\FirePHPHandler',
+    			'Monolog\Handler\StreamHandler',
+    			'Monolog\Handler\StreamHandler',
+    	);
+
+    	foreach ($as_expectedWriters as $s_expectedWriter) {
+
+    		if ('Monolog\Handler\ZendMonitor' == $s_expectedWriter &&
+    		    !function_exists('zend_monitor_custom_event')) {
+    			break;
+    		}
+
+    		// Does it have a writer?
+    		$I_handler = $I_channel->popHandler();
+    		$this->assertInstanceOf($s_expectedWriter, $I_handler);
+
+    		// Is it the writer configured to bubble?
+    		$this->assertTrue($I_handler->getBubble());
+
+
+    	}
+
+    }
+
+
+    /**
+     * Logger is configured to write to Zend Monitor (not installed)
+     *
+     * @expectedException \Monolog\Handler\MissingExtensionException
+     * @expectedExceptionMessage You must have Zend Server installed in order to use this handler
+     */
+    public function testZendMonitorWriterWithoutExtension() {
+
+    	if (function_exists('zend_monitor_custom_event')) {
+    		$this->markTestSkipped('ZendServer is installed');
+    	}
+
+    	$this->I_factory = new LoggerFactory();
     	$I_logger = $this->I_factory->createService($this->getMockSM());
 
     	// Have we created an instance of our Logger?
@@ -92,10 +145,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
 
     	// Does it have a writer?
     	$I_handler = $I_channel->popHandler();
-    	$this->assertInstanceOf('Monolog\Handler\AbstractHandler', $I_handler);
-
-    	// Is it the writer configured to bubble?
-    	$this->assertTrue($I_handler->getBubble());
+    	$this->assertInstanceOf('Monolog\Handler\ZendMonitor', $I_handler);
 
     }
 
@@ -174,7 +224,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
      * No severity has been set for a writer
      *
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Writer default needs parameter log_above to be set
+     * @expectedExceptionMessage Writer default needs parameter min_severity to be set
      */
     public function testNoSeveritySet() {
 
@@ -254,6 +304,7 @@ class LoggerFactoryTest extends \PHPUnit_Framework_TestCase {
     	$s_confToLoad = lcfirst(substr($am_trace[1]['function'], 4));
 
     	$am_serviceConf = $this->I_mockConfig->getConf($s_confToLoad);
+
     	$this->I_mockSM->shouldReceive('get')->with('Config')->once()->andReturn($am_serviceConf);
 
     	return $this->I_mockSM;

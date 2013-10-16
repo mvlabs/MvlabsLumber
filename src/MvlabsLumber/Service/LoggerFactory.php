@@ -19,7 +19,12 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 use Monolog\Logger as Monolog;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\FirePHPHandler;
+use Monolog\Handler\ChromePHPHandler;
 use Monolog\Handler\CouchDBHandler;
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Handler\SyslogHandler;
+use Monolog\Handler\RotatingFileHandler;
+use Monolog\Handler\ZendMonitorHandler;
 
 class LoggerFactory implements FactoryInterface {
 
@@ -129,7 +134,7 @@ class LoggerFactory implements FactoryInterface {
 
 		// Minimum logging level for writer needs to be specified
     	if (!array_key_exists('min_severity', $am_writerConf)) {
-			throw new \InvalidArgumentException('Writer ' . $s_writerName . ' needs parameter log_above to be set');
+			throw new \InvalidArgumentException('Writer ' . $s_writerName . ' needs parameter min_severity to be set');
     	}
 
 		// Is minimum logging level valid?
@@ -148,6 +153,7 @@ class LoggerFactory implements FactoryInterface {
     	switch($am_writerConf['type']) {
 
     		case 'file':
+    		case 'stream':
 
     			$s_filePath = $am_writerConf["destination"];
 
@@ -156,11 +162,83 @@ class LoggerFactory implements FactoryInterface {
     				throw new \InvalidArgumentException('Can not continue writing to ' . $s_filePath . ' in writer ' . $s_writerName . ' of type ' . $am_writerConf['type'] . ' in Lumber configuration');
     			}
 
-    			// @TODO: Improve for testability. Get writer out of service manager, instead of creating it here
     			$I_writer = new StreamHandler($am_writerConf["destination"], $s_logAbove, $b_bubble);
     			break;
 
-    		// @TODO: Implement configurartion handling for all other supported Monolog Handlers
+
+    		case 'firephp':
+
+    			$I_writer = new FirePHPHandler($s_logAbove, $b_bubble);
+    			break;
+
+
+    		case 'chromephp':
+
+    			$I_writer = new ChromePHPHandler($s_logAbove, $b_bubble);
+    			break;
+
+
+    		case 'couchdb':
+
+    			$am_options = array();
+
+    			if (array_key_exists('options', $am_writerConf) &&
+    			    is_array($am_writerConf['options']) &&
+    			    count($am_writerConf['options']) > 0) {
+    				$am_options = $am_writerConf['options'];
+    			}
+
+    			$I_writer = new CouchDBHandler($am_options, $s_logAbove, $b_bubble);
+
+    			break;
+
+
+    		case 'phplog':
+
+    			$I_writer = new ErrorLogHandler($s_logAbove, $b_bubble);
+    			break;
+
+
+    		case 'syslog':
+
+    			$s_ident = 'lumber';
+    			if (array_key_exists('ident', $am_writerConf)) {
+    				$s_ident = $am_writerConf['ident'];
+    			}
+
+    			$s_facility = 'local0';
+    			if (array_key_exists('facility', $am_writerConf)) {
+    				$s_facility = $am_writerConf['facility'];
+    			}
+
+    			$I_writer = new SyslogHandler($s_ident, $s_facility, $s_logAbove, $b_bubble, LOG_PID);
+    			break;
+
+
+    		case 'rotatingfile':
+
+    			$s_filePath = $am_writerConf["destination"];
+
+    			// Destination file has to be writable
+    			if (!is_writable($s_filePath) && !is_writable(dirname($s_filePath))) {
+    				throw new \InvalidArgumentException('Can not continue writing to ' . $s_filePath . ' in writer ' . $s_writerName . ' of type ' . $am_writerConf['type'] . ' in Lumber configuration');
+    			}
+
+    			$i_daysKept = 0;
+    			if (array_key_exists('days_kept', $am_writerConf)) {
+    				$i_maxFiles = $am_writerConf['days_kept'];
+    			}
+
+    			$I_writer = new RotatingFileHandler($am_writerConf["destination"], $i_daysKept, $s_logAbove, $b_bubble);
+    			break;
+
+
+    		case 'zendmonitor':
+
+    			$I_writer = new ZendMonitorHandler($s_logAbove, $b_bubble);
+    			break;
+
+
 
     		default:
 
@@ -183,7 +261,7 @@ class LoggerFactory implements FactoryInterface {
      *
      * @param string $s_paramName parameter name
      * @param array $am_writerConf configuration array
-     * @return Ambigous <NULL, parameter value>
+     * @return mixed parameter value
      */
     private function getOptionalParam($s_paramName, $am_writerConf) {
 
