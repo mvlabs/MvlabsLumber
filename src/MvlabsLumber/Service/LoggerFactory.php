@@ -25,6 +25,7 @@ use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\ZendMonitorHandler;
+use Monolog\Handler\NativeMailerHandler;
 
 class LoggerFactory implements FactoryInterface {
 
@@ -238,7 +239,24 @@ class LoggerFactory implements FactoryInterface {
     			$I_writer = new ZendMonitorHandler($s_logAbove, $b_bubble);
     			break;
 
-
+			case 'nativemailer':
+			
+			    if (!array_key_exists('to', $am_writerConf)) {
+			        throw new \InvalidArgumentException('Writer ' . $s_writerName . ' needs parameter "to" to be set');
+			    }
+			
+			    $s_subject = '[Application] Error';
+			    if (array_key_exists('subject', $am_writerConf)) {
+			        $s_subject = $am_writerConf['subject'];
+			    }
+			
+			    $s_from = '';
+			    if (array_key_exists('from', $am_writerConf)) {
+			        $s_from = $am_writerConf['from'];
+			    }
+			
+			    $I_writer = new NativeMailerHandler($am_writerConf["to"], $s_subject, $s_from);
+			    break;
 
     		default:
 
