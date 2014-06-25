@@ -214,6 +214,14 @@ class MockConfigs {
     							'min_severity' => 'notice',
     							'days_kept' => 10,
     						),
+    						'nativemailer' => array(
+    						    'type' => 'nativemailer',
+    						    'from' => 'info@mvlabs.it',
+    						    'to'   => 'bill.gates@microsoft.com',
+    						    'subject' => '[Application] Ooooops an error has occurred.',
+    						    'min_severity' => 'notice',
+    						    'propagate' => true,
+    						),
 
     				),
     			    'channels' => array(
@@ -261,7 +269,31 @@ class MockConfigs {
     	),
 	);
 
-
+    /**
+     * wrong nativemailer writer configuration, missing to parameter
+     * @var array Lumber configuration
+     */
+    protected $am_wrongNativemailerFileWriter = array (
+    
+        'lumber' => array(
+    
+            'writers' => array(
+                'default' => array(
+                    'type' => 'nativemailer',
+                    'min_severity' => 'info',
+                ),
+            ),
+    
+            'channels' => array(
+                'default' => array(
+                    'writers' => array(
+                        'default'
+                    ),
+                ),
+            ),
+        ),
+    );
+    
     /**
      * No severity specified
      * @var array Lumber configuration
