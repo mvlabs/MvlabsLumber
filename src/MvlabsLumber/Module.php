@@ -18,14 +18,12 @@ use Zend\Mvc\ApplicationInterface;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\ModuleRouteListener;
 
-
 /**
  * MvlabsLumber Module
  */
 class Module {
 
-
-	/**
+    /**
 	 * {@inheritDoc}
 	 */
 	public function onBootstrap(MvcEvent $I_e)	{
@@ -100,7 +98,6 @@ class Module {
 
 			$I_request = $I_sm->get('Request');
 			\Zend\EventManager\StaticEventManager::getInstance()->attach($s_target, $s_event,
-			// $I_sharedManager->attach($s_target, $s_event,
 					                 function($I_event) use ($I_lumber, $I_request, $am_eventInfo, $am_eventConf) {
 
 			    list($s_target, $s_event, $s_severity, $b_verbose) = $am_eventConf;
@@ -109,7 +106,7 @@ class Module {
 
 				if ($I_event instanceof \Zend\EventManager\Event) {
 
-					$s_target = $I_event->getTarget();
+				    $s_target = $I_event->getTarget();
 					$s_name = $I_event->getName();
 					$am_params = $I_event->getParams();
 
@@ -126,51 +123,30 @@ class Module {
 					$am_additionalInfo['post_params'] = $s_postParams;
 
 					if (array_key_exists('message', $am_params)) {
-						$as_messages[] = $am_params['message'];
+						$s_message = $am_params['message'];
 					}
 
-					// Exceptions need to be made human readable
 					if (array_key_exists('exception', $am_params) &&
 					    $am_params['exception'] instanceof \Exception) {
-
-						$I_exception = $am_params['exception'];
-						do {
-
-							$as_messages[] = $I_exception->getMessage();
-
-							// Shall we also include exception traces?
-							if($b_verbose) {
-								$am_traces = $I_exception->getTrace();
-								foreach ($am_traces as $am_trace) {
-
-									$s_tempMessage = 'Error';
-									$as_toCheck = array('file', 'line', 'class', 'method');
-									foreach ($as_toCheck as $s_check) {
-										$s_tempMessage .= (array_key_exists($s_check, $am_trace)?' '.$s_check.': '.$am_trace[$s_check]:'');
-									}
-
-									$as_messages[] = $s_tempMessage;
-								}
-							}
-
-						}
-						while($I_exception = $I_exception->getPrevious());
-
+					
+					    $I_exception = $am_params['exception'];
+					    $s_message = $I_exception->getMessage();
+					    
+					    // Exceptions need to be made human readable
+					    if ($b_verbose) {
+					        $s_message .= $I_exception->getTraceAsString();
+					    }
 					}
 				}
 
 				$am_additionalInfo['event'] = $s_event;
 				$am_additionalInfo['target'] = $s_target;
-
-				foreach ($as_messages as $s_message) {
-					$I_lumber->log($s_message, $s_severity, $am_additionalInfo);
-				}
-
+				
+				$I_lumber->log($s_message, $s_severity, $am_additionalInfo);
+				
 			});
-
 		}	// Foreach
 	}
-
 
 	/**
 	 * Support function extracting configuration event information
@@ -207,6 +183,4 @@ class Module {
 		return array($s_target, $s_event, $s_severity, $b_verbose);
 
 	}
-
-
 }

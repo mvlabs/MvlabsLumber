@@ -47,7 +47,6 @@ class LoggerFactory implements FactoryInterface {
 	 */
 	protected $am_writersConf = array();
 
-
     /**
      * {@inheritDoc}
      *
@@ -91,12 +90,12 @@ class LoggerFactory implements FactoryInterface {
 		foreach ($am_loggerConf['channels'] as $s_channelName => $am_channelInfo) {
 
 			$I_channel = new Monolog($s_channelName);
-
+			
 			foreach ($am_channelInfo['writers'] as $s_writerName) {
 
 				// Proper writer is setup and returned
 				$I_writer = $this->getConfiguredWriter($s_writerName);
-
+				
 				// Writer is added to Monolog channel
 				$I_channel->pushHandler($I_writer);
 			}
@@ -108,7 +107,6 @@ class LoggerFactory implements FactoryInterface {
 		return $I_logger;
 
     }
-
 
 	/**
 	 * Gets configured writer (a Monolog handler)
@@ -244,18 +242,20 @@ class LoggerFactory implements FactoryInterface {
 			    if (!array_key_exists('to', $am_writerConf)) {
 			        throw new \InvalidArgumentException('Writer ' . $s_writerName . ' needs parameter "to" to be set');
 			    }
+			    
+			    if (!array_key_exists('from', $am_writerConf)) {
+			        throw new \InvalidArgumentException('Writer ' . $s_writerName . ' needs parameter "from" to be set');
+			    }
 			
 			    $s_subject = '[Application] Error';
 			    if (array_key_exists('subject', $am_writerConf)) {
 			        $s_subject = $am_writerConf['subject'];
 			    }
 			
-			    $s_from = '';
-			    if (array_key_exists('from', $am_writerConf)) {
-			        $s_from = $am_writerConf['from'];
-			    }
+			    $s_to   = $am_writerConf["to"];
+			    $s_from = $am_writerConf['from'];			    
 			
-			    $I_writer = new NativeMailerHandler($am_writerConf["to"], $s_subject, $s_from);
+			    $I_writer = new NativeMailerHandler($s_to, $s_subject, $s_from, $s_logAbove, $b_bubble);
 			    break;
 
     		default:
@@ -272,7 +272,6 @@ class LoggerFactory implements FactoryInterface {
     	return $I_writer;
 
     }
-
 
     /**
      * Returns value of a parameter if present, null otherwise
@@ -292,6 +291,4 @@ class LoggerFactory implements FactoryInterface {
     	return $m_paramValue;
 
     }
-
-
 }
