@@ -51,15 +51,15 @@ class Logger implements LoggerInterface {
 	 *
 	 * @var array Monolog logging levels
 	 */
-	protected $as_monologLevels = array(
-			'debug'     => 100,
-			'info'      => 200,
-			'notice'    => 250,
-			'warning'   => 300,
-			'error'     => 400,
-			'critical'  => 500,
-			'alert'     => 550,
-			'emergency' => 600,
+	public static $as_monologLevels = array(
+			self::DEBUG     => \Monolog\Logger::DEBUG,
+			self::INFO      => \Monolog\Logger::INFO,
+			self::NOTICE    => \Monolog\Logger::NOTICE,
+			self::WARNING   => \Monolog\Logger::WARNING,
+			self::ERROR     => \Monolog\Logger::ERROR,
+			self::CRITICAL  => \Monolog\Logger::CRITICAL,
+			self::ALERT     => \Monolog\Logger::ALERT,
+			self::EMERGENCY => \Monolog\Logger::EMERGENCY,
 	);
 
 
@@ -73,7 +73,7 @@ class Logger implements LoggerInterface {
 		// @TODO: needs to be replaced if new constants are introduced within the class
 		$I_ref = new \ReflectionClass(__CLASS__);
 		$am_levels = $I_ref->getConstants();
-
+		
 		return $am_levels;
 
 	}
@@ -87,10 +87,8 @@ class Logger implements LoggerInterface {
 	 */
 	public static function isValidSeverityLevel($m_level) {
 
-		$am_validLevels = self::getSeverityLevels();
-
 		// If an invalid operator is specified, an Exception is thrown
-		if (in_array($m_level,$am_validLevels)) {
+		if (in_array($m_level,self::getSeverityLevels())) {
 			return true;
 		}
 
@@ -165,7 +163,7 @@ class Logger implements LoggerInterface {
     	}
 
     	foreach ($this->aI_channels as $s_channelName => $I_channel) {
-    		$I_channel->addRecord($this->as_monologLevels[$s_level], $s_message, $am_context);
+    	    $I_channel->addRecord(self::$as_monologLevels[$s_level], $s_message, $am_context);
     	}
 
     }
