@@ -196,8 +196,8 @@ class LoggerFactory implements FactoryInterface {
 
 
     		case 'phplog':
-
-    			$I_writer = new ErrorLogHandler($m_logAbove, $b_bubble);
+                $i_type = ErrorLogHandler::OPERATING_SYSTEM;  
+    			$I_writer = new ErrorLogHandler($i_type, $m_logAbove, $b_bubble);
     			break;
 
 
