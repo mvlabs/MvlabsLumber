@@ -26,6 +26,8 @@ return array(
 						'custom_handler' => array('event' => 'invocato',
 												  'target' => 'Application\Controller\ErrorController',
 												  'verbose' => true,
+                        						  'filter_exception_messages_containing' => array(),
+                        						  'filter_event_errors_containing' => array(),
 						),
 
 					),
