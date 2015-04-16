@@ -88,8 +88,13 @@ class Module {
 
 		foreach ($am_events as $s_eventName => $am_eventInfo) {
 
+		    $b_discardEvent = false;
+		    
 			$am_eventConf = $this->getEventInfo($am_eventInfo);
-			list($s_target, $s_event, $s_severity, $b_verbose) = $am_eventConf;
+			
+			list($s_target, $s_event, $s_severity, $b_verbose, $am_filterErrorKinds, $as_filterMessages) = $am_eventConf;
+			
+			file_put_contents('/tmp/config', json_encode($am_eventConf)."\n", FILE_APPEND);
 
 			// Check for problems upon app initialization, rather than when event is triggered
 			if (!$I_lumber->isValidSeverityLevel($s_severity)) {
@@ -100,7 +105,11 @@ class Module {
 			\Zend\EventManager\StaticEventManager::getInstance()->attach($s_target, $s_event,
 					                 function($I_event) use ($I_lumber, $I_request, $am_eventInfo, $am_eventConf) {
 
-			    list($s_target, $s_event, $s_severity, $b_verbose) = $am_eventConf;
+			    /*
+				file_put_contents('/tmp/log', json_encode($am_eventConf)."\n", FILE_APPEND);
+				file_put_contents('/tmp/log', json_encode($I_event->getParams())."\n", FILE_APPEND);
+				*/
+			    list($s_target, $s_event, $s_severity, $b_verbose, $am_filterErrorKinds, $as_filterMessages) = $am_eventConf;
 
 				$s_message = '';
 
@@ -122,27 +131,48 @@ class Module {
 					$s_postParams = json_encode($I_request->getPost());
 					$am_additionalInfo['post_params'] = $s_postParams;
 
-					if (array_key_exists('message', $am_params)) {
-						$s_message = $am_params['message'];
+					$s_message = '';
+					
+					if (array_key_exists('error', $am_params)) {
+					    $am_additionalInfo['error'] = $am_params['error'];
+					    if (in_array($am_params['error'], $am_filterErrorKinds)) {
+					        $b_discardEvent = true;
+					    }
 					}
-
+					
+					if (array_key_exists('message', $am_params)) {
+						$s_message .= $am_params['message'];
+					}
+					
 					if (array_key_exists('exception', $am_params) &&
 					    $am_params['exception'] instanceof \Exception) {
 					
 					    $I_exception = $am_params['exception'];
 					    $s_message = $I_exception->getMessage();
 					    
+					    // Are there any filters on message string?
+					    foreach ($as_filterMessages as $s_exceptionMessage) {
+					        // Make this comparison loose...
+					        if (false !== strpos($s_message, $s_exceptionMessage )) {
+					            $b_discardEvent = true;
+					        }    
+					    }
+					    
+					    
 					    // Exceptions need to be made human readable
 					    if ($b_verbose) {
 					        $s_message .= $I_exception->getTraceAsString();
 					    }
 					}
+					
 				}
-
+				
 				$am_additionalInfo['event'] = $s_event;
 				$am_additionalInfo['target'] = $s_target;
 				
-				$I_lumber->log($s_message, $s_severity, $am_additionalInfo);
+				if (!$b_discardEvent) {
+				    $I_lumber->log($s_message, $s_severity, $am_additionalInfo);				    
+				}
 				
 			});
 		}	// Foreach
@@ -180,7 +210,20 @@ class Module {
 		}
 		$b_verbose = $am_eventInfo['verbose'];
 
-		return array($s_target, $s_event, $s_severity, $b_verbose);
+		$as_filters = array();
+		if (array_key_exists('filter_messages_containing', $am_eventInfo) &&
+		is_array($am_eventInfo['filter_messages_containing'])) {
+		    $as_filters = $am_eventInfo['filter_messages_containing'];
+		}
+
+		$as_errorsToDrop = array();
+		if (array_key_exists('filter_error_kinds', $am_eventInfo) &&
+		is_array($am_eventInfo['filter_error_kinds'])) {
+		    $as_errorsToDrop = $am_eventInfo['filter_error_kinds'];
+		}
+		
+		return array($s_target, $s_event, $s_severity, $b_verbose, $as_errorsToDrop, $as_filters);
 
 	}
 }
+
