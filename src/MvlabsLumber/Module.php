@@ -88,14 +88,10 @@ class Module {
 
 		foreach ($am_events as $s_eventName => $am_eventInfo) {
 
-		    $b_discardEvent = false;
+		    $am_eventConf = $this->getEventInfo($am_eventInfo);
 		    
-			$am_eventConf = $this->getEventInfo($am_eventInfo);
-			
 			list($s_target, $s_event, $s_severity, $b_verbose, $am_filterErrorKinds, $as_filterMessages) = $am_eventConf;
 			
-			file_put_contents('/tmp/config', json_encode($am_eventConf)."\n", FILE_APPEND);
-
 			// Check for problems upon app initialization, rather than when event is triggered
 			if (!$I_lumber->isValidSeverityLevel($s_severity)) {
 				throw new \InvalidArgumentException('Severity ' . $s_severity . ' is invalid');
@@ -105,10 +101,8 @@ class Module {
 			\Zend\EventManager\StaticEventManager::getInstance()->attach($s_target, $s_event,
 					                 function($I_event) use ($I_lumber, $I_request, $am_eventInfo, $am_eventConf) {
 
-			    /*
-				file_put_contents('/tmp/log', json_encode($am_eventConf)."\n", FILE_APPEND);
-				file_put_contents('/tmp/log', json_encode($I_event->getParams())."\n", FILE_APPEND);
-				*/
+				$b_discardEvent = false;
+					                     
 			    list($s_target, $s_event, $s_severity, $b_verbose, $am_filterErrorKinds, $as_filterMessages) = $am_eventConf;
 
 				$s_message = '';
@@ -211,15 +205,15 @@ class Module {
 		$b_verbose = $am_eventInfo['verbose'];
 
 		$as_filters = array();
-		if (array_key_exists('filter_messages_containing', $am_eventInfo) &&
-		is_array($am_eventInfo['filter_messages_containing'])) {
-		    $as_filters = $am_eventInfo['filter_messages_containing'];
+		if (array_key_exists('filter_exception_messages_containing', $am_eventInfo) &&
+		is_array($am_eventInfo['filter_exception_messages_containing'])) {
+		    $as_filters = $am_eventInfo['filter_exception_messages_containing'];
 		}
 
 		$as_errorsToDrop = array();
-		if (array_key_exists('filter_error_kinds', $am_eventInfo) &&
-		is_array($am_eventInfo['filter_error_kinds'])) {
-		    $as_errorsToDrop = $am_eventInfo['filter_error_kinds'];
+		if (array_key_exists('filter_event_errors_containing', $am_eventInfo) &&
+		is_array($am_eventInfo['filter_event_errors_containing'])) {
+		    $as_errorsToDrop = $am_eventInfo['filter_event_errors_containing'];
 		}
 		
 		return array($s_target, $s_event, $s_severity, $b_verbose, $as_errorsToDrop, $as_filters);
